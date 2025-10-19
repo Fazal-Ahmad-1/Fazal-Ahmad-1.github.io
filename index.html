@@ -407,20 +407,55 @@
       // --- From components/Contact.tsx ---
       const Contact = () => {
         const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-
+       
         const handleChange = (e) => {
           const { name, value } = e.target;
           setFormData(prev => ({ ...prev, [name]: value }));
         };
-
-        const handleSubmit = (e) => {
+        
+        // This is the new handleSubmit function
+        const handleSubmit = async (e) => {
           e.preventDefault();
-          // Handle form submission logic here
-          console.log('Form submitted:', formData);
-          alert('Thank you for your message!');
-          setFormData({ name: '', email: '', message: '' });
+          
+          // --- PASTE YOUR ACCESS KEY HERE ---
+          const access_key = "dc941e4c-4196-4613-98a9-be7fca4fc3e0"; 
+          // ------------------------------------
+
+          const dataWithKey = {
+            ...formData,
+            access_key: access_key,
+            subject: `New Message from ${formData.name} (Portfolio)`,
+            from_name: formData.name,
+            replyto: formData.email,
+          };
+
+          try {
+            const res = await fetch('https://api.web3forms.com/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(dataWithKey)
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+              console.log('Form submitted:', result);
+              alert('Thank you for your message! It has been sent.');
+              setFormData({ name: '', email: '', message: '' }); // Clear the form
+            } else {
+              console.error('Form submission error:', result);
+              alert(`Error: ${result.message}`);
+            }
+          } catch (error) {
+            console.error('There was an error submitting the form:', error);
+            alert('There was an error sending your message. Please try again later.');
+          }
         };
 
+        // This part (the 'return') is the same as before
         return (
           <section id="contact" className="py-20 bg-brand-light/30">
             <div className="container mx-auto px-6">
@@ -482,6 +517,8 @@
           </section>
         );
       };
+
+      
 
       // --- From components/Footer.tsx ---
       const socialLinks_Footer = [
